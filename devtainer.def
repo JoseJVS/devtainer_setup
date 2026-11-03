@@ -1,0 +1,119 @@
+Bootstrap: docker
+From: nvidia/cuda:13.4.3-devel-ubuntu26.04
+
+%post
+    set -euxo pipefail
+
+    date
+
+    export DEBIAN_FRONTEND=noninteractive
+
+    # Update repositories
+    apt-get \
+        -o Acquire::Retries=3 \
+        -o APT::Update::Error-Mode=any \
+        update
+
+    # Compilers and runtime
+    apt-get \
+        -o Acquire::Retries=3 \
+        install -y --no-install-recommends \
+        libc6 \
+        libc6-dev \
+        libc6-dbg \
+        libstdc++6 \
+        gcc \
+        g++
+
+    # Building tools
+    apt-get \
+        -o Acquire::Retries=3 \
+        install -y --no-install-recommends \
+        build-essential \
+        pkg-config \
+        libtool \
+        libltdl7 \
+        libltdl-dev \
+        binutils
+
+    # Web tools
+    apt-get \
+        -o Acquire::Retries=3 \
+        install -y --no-install-recommends \
+        ca-certificates \
+        openssl \
+        libssl-dev \
+        curl \
+        wget
+
+    # Archiving tools
+    apt-get \
+        -o Acquire::Retries=3 \
+        install -y --no-install-recommends \
+        tar \
+        gzip \
+        bzip2 \
+        xz-utils \
+        zip \
+        unzip
+
+    # Compile libraries
+    apt-get \
+        -o Acquire::Retries=3 \
+        install -y --no-install-recommends \
+        libopenmpi-dev \
+        openmpi-bin \
+        openmpi-common \
+        libboost-all-dev \
+        libgsl-dev \
+        gsl-bin
+
+    # Development tools
+    apt-get \
+        -o Acquire::Retries=3 \
+        install -y --no-install-recommends \
+        git \
+        gdb \
+        linux-perf \
+        valgrind \
+        valgrind-mpi
+
+    # Shell essentials
+    apt-get \
+        -o Acquire::Retries=3 \
+        install -y --no-install-recommends \
+        gnu-coreutils \
+        locales \
+        bash \
+        bash-completion \
+        vim \
+        less \
+        file \
+        procps \
+        sudo
+
+    # Check installed packages
+    apt-get check
+    dpkg --audit
+
+    # Cleanup packaging cache
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Generate only en_US UTF-8
+    sed -i '/^# *en_US.UTF-8 UTF-8/s/^# //' /etc/locale.gen
+    locale-gen en_US.UTF-8
+
+%environment
+    export PYTHONNOUSERSITE=1
+    export LANG=en_US.UTF-8
+    export LANGUAGE=en_US:en
+    export LC_ALL=en_US.UTF-8
+    export COLORTERM=truecolor
+    export TERM=xterm-256color
+
+%runscript
+    if [ "$#" -eq 0 ]; then
+        exec /bin/bash --noprofile --norc
+    fi
+    exec "$@"
