@@ -14,7 +14,6 @@ From: nvidia/cuda:13.4.3-devel-ubuntu26.04
         -o APT::Update::Error-Mode=any \
         update
 
-    # Compilers and runtime
     apt-get \
         -o Acquire::Retries=3 \
         install -y --no-install-recommends \
@@ -23,74 +22,39 @@ From: nvidia/cuda:13.4.3-devel-ubuntu26.04
         libc6-dbg \
         libstdc++6 \
         gcc \
-        g++
-
-    # Building tools
-    apt-get \
-        -o Acquire::Retries=3 \
-        install -y --no-install-recommends \
+        g++ \
         build-essential \
         pkg-config \
         libtool \
         libltdl7 \
         libltdl-dev \
-        binutils
-
-    # Web tools
-    apt-get \
-        -o Acquire::Retries=3 \
-        install -y --no-install-recommends \
+        binutils \
         ca-certificates \
         openssl \
         libssl-dev \
         curl \
-        wget
-
-    # Archiving tools
-    apt-get \
-        -o Acquire::Retries=3 \
-        install -y --no-install-recommends \
+        wget \
         tar \
         gzip \
         bzip2 \
         xz-utils \
         zip \
-        unzip
-
-    # Compile libraries
-    apt-get \
-        -o Acquire::Retries=3 \
-        install -y --no-install-recommends \
+        unzip \
         libopenmpi-dev \
         openmpi-bin \
         openmpi-common \
         libboost-all-dev \
         libgsl-dev \
-        gsl-bin
-
-    # Development tools
-    apt-get \
-        -o Acquire::Retries=3 \
-        install -y --no-install-recommends \
+        gsl-bin \
         git \
         gdb \
         linux-perf \
         valgrind \
-        valgrind-mpi
-
-    # Python essentials
-    apt-get \
-        -o Acquire::Retries=3 \
-        install -y --no-install-recommends \
+        valgrind-mpi \
         python3 \
         python3-dev \
         python3-pip \
-        python3-venv
-
-    # Shell essentials
-    apt-get \
-        -o Acquire::Retries=3 \
-        install -y --no-install-recommends \
+        python3-venv \
         gnu-coreutils \
         locales \
         bash \
