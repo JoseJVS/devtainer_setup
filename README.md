@@ -63,3 +63,16 @@ echo >> $HOME/.bashrc
 echo 'alias vim="nvim"' >> $HOME/.bashrc
 echo 'alias vimdiff="nvim -d"' >> $HOME/.bashrc
 ```
+
+## Tmux Configuration
+
+* On host side:
+
+```shell
+mkdir -pv [[CONTAINER_HOME]]/.config/tmux
+cp tmux.conf [[CONTAINER_HOME]]/.config/tmux
+```
+
+* On container side (if already on tmux):
+
+```tmux source-file $HOME/.config/tmux/tmux.conf```
