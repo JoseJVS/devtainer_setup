@@ -46,4 +46,20 @@ brew install \
 
 #GDB Dashboard
 wget -P ~ https://github.com/cyrus-and/gdb-dashboard/raw/master/.gdbinit
+
+echo >> $HOME/.bashrc
+echo 'alias gdu="gdu-go"' >> $HOME/.bashrc
+```
+
+## Neovim Configuration
+
+```shell
+mkdir -pv $HOME/.config
+git clone --single-branch --depth 1 -b main \
+    https://github.com/JoseJVS/nvim_config.git \
+    $HOME/.config/nvim
+
+echo >> $HOME/.bashrc
+echo 'alias vim="nvim"' >> $HOME/.bashrc
+echo 'alias vimdiff="nvim -d"' >> $HOME/.bashrc
 ```
