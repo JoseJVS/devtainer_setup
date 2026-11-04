@@ -13,6 +13,8 @@ data="$apptainer_state/data"
 work="$apptainer_state/work"
 tmp="$apptainer_state/tmp"
 
+# Clear tmp if it previously exist
+rm -rf "$tmp"
 mkdir -pv "$software" "$overlay" "$home" "$data" "$work" "$tmp"
 
 gpu_environment=()
