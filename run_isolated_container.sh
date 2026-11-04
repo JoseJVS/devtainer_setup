@@ -12,10 +12,11 @@ home="$apptainer_state/home"
 data="$apptainer_state/data"
 work="$apptainer_state/work"
 tmp="$apptainer_state/tmp"
+hd="$home/dev"
 
 # Clear tmp if it previously exist
 rm -rf "$tmp"
-mkdir -pv "$software" "$overlay" "$home" "$data" "$work" "$tmp"
+mkdir -pv "$software" "$overlay" "$home" "$data" "$work" "$tmp" "$hd"
 
 gpu_environment=()
 if [[ ${CUDA_VISIBLE_DEVICES+x} ]]; then
@@ -33,16 +34,17 @@ exec env -i \
         --cleanenv \
         --no-eval \
         --no-mount hostfs,bind-paths,cwd \
-        --home "$home:/home" \
+        --home "$hd:/home/dev" \
+        --bind "$home:/home:rw" \
         --bind "$tmp:/tmp:rw" \
         --bind "$work:/work:rw" \
         --bind "$data:/data:ro" \
         --bind "$software:/software:ro" \
         --bind "/etc/resolv.conf:/etc/resolv.conf:ro" \
         --overlay "$overlay" \
-        --cwd /home \
+        --cwd /home/dev \
         --env TMPDIR=/tmp \
         "${gpu_environment[@]}" \
         --nv \
         "$apptainer_image" \
-        /bin/bash --noprofile --rcfile /home/.bashrc
+        /bin/bash --noprofile --rcfile /home/dev/.bashrc
