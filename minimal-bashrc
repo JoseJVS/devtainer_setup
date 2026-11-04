@@ -23,6 +23,8 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-alias gs="git status -sb"
 alias ll="ls -alh"
+alias cdw="cd /work"
+alias cdd="cd /data"
+alias gs="git status -sb"
 alias mki="make -j $(nproc) && make install"
