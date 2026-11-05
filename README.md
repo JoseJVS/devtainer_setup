@@ -1,5 +1,28 @@
 # Container Setup
 
+## Requirements
+
+Tested on Ubuntu 26.04:
+
+* fuse3 [3.18.2]
+* fuse-overlayfs [1.14]
+* Apptainer [1.5.5]
+
+Run ```build_devtainer.sh``` once to build the image and ```run_isolated_container.sh```
+to generate the isolation directory structure as well as testing the image.
+
+Building the image and the isolation directory structure are done using absolute
+paths within ```$HOME/Apptainer``` with the goal of then being able to add
+```run_isolated_container.sh``` to the user binaries and work from anywhere
+within the host system:
+
+```shell
+ln -s $PWD/run_isolated_container.sh $HOME/.local/bin/devtainer
+```
+
+(Make sure ```$HOME/.local/bin``` is within ```$PATH```
+for ```devtainer``` to be findable).
+
 ## Isolated structure hierarchy
 
 The container is run in isolation with a read only system image file i.e.
