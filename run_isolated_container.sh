@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -euxo pipefail
 
 apptainer_name="devtainer"
@@ -12,11 +13,11 @@ home="$apptainer_state/home"
 data="$apptainer_state/data"
 work="$apptainer_state/work"
 tmp="$apptainer_state/tmp"
-hd="$home/dev"
+home_name="$home/$apptainer_name"
 
 # Clear tmp if it previously exist
 rm -rf "$tmp"
-mkdir -pv "$software" "$overlay" "$home" "$data" "$work" "$tmp" "$hd"
+mkdir -pv "$software" "$overlay" "$home" "$data" "$work" "$tmp" "$home_name"
 
 gpu_environment=()
 if [[ ${CUDA_VISIBLE_DEVICES+x} ]]; then
@@ -34,7 +35,7 @@ exec env -i \
         --cleanenv \
         --no-eval \
         --no-mount hostfs,bind-paths,cwd \
-        --home "$hd:/home/dev" \
+        --home "$home_name:/home/$apptainer_name" \
         --bind "$home:/home:rw" \
         --bind "$tmp:/tmp:rw" \
         --bind "$work:/work:rw" \
@@ -42,9 +43,9 @@ exec env -i \
         --bind "$software:/software:ro" \
         --bind "/etc/resolv.conf:/etc/resolv.conf:ro" \
         --overlay "$overlay" \
-        --cwd /home/dev \
+        --cwd "/home/$apptainer_name" \
         --env TMPDIR=/tmp \
         "${gpu_environment[@]}" \
         --nv \
         "$apptainer_image" \
-        /bin/bash --noprofile --rcfile /home/dev/.bashrc
+        /bin/bash --noprofile --rcfile "/home/$apptainer_name/.bashrc"
