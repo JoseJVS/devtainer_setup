@@ -35,14 +35,14 @@ for the bindings of the container.
 The following structure is the binding hierarchy created by run_isolated_container.sh:
 
 ```txt
-|-- state
-    |-- devtainer
-        |-- home [rw]
-        |-- software [ro]
-        |-- overlay [rw]
-        |-- data [ro]
-        |-- tmp [rw]
-        |-- work [rw]
+state
+|-- devtainer
+    |-- home [rw]
+    |-- software [ro]
+    |-- overlay [rw]
+    |-- data [ro]
+    |-- tmp [rw]
+    |-- work [rw]
 
 [ro] -> read only
 [rw] -> read and write
