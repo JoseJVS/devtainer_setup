@@ -79,3 +79,6 @@ cp tmux.conf [[CONTAINER_HOME]]/.config/tmux
 * On container side (if already on tmux):
 
 ```tmux source-file $HOME/.config/tmux/tmux.conf```
+
+* Then to install plugings:
+```<ctrl-b>I```
