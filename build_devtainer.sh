@@ -1,3 +1,8 @@
 #!/bin/bash
 
-source set_cache_tmp.sh && apptainer build devtainer.sif devtainer.def |& tee build.log
+export APPTAINER_CACHEDIR="$HOME/Apptainer/build_cache"
+export APPTAINER_TMPDIR="$HOME/Apptainer/build_tmp"
+
+mkdir -pv "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
+
+apptainer build devtainer.sif devtainer.def |& tee build.log
