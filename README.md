@@ -4,9 +4,9 @@
 
 Tested on Ubuntu 26.04:
 
-* fuse3 [3.18.2]
-* fuse-overlayfs [1.14]
-* Apptainer [1.5.5]
+* ``fuse3`` [3.18.2]
+* ``fuse-overlayfs`` [1.14]
+* ``apptainer`` [1.5.5]
 
 Run ```build_devtainer.sh``` once to build the image and ```run_isolated_container.sh```
 to generate the isolation directory structure as well as testing the image.
@@ -23,7 +23,7 @@ ln -s $PWD/run_isolated_container.sh $HOME/.local/bin/devtainer
 (Make sure ```$HOME/.local/bin``` is within ```$PATH```
 for ```devtainer``` to be findable).
 
-## Isolated structure hierarchy
+## Isolated Structure Hierarchy
 
 The container is run in isolation with a read only system image file i.e.
 partitions like ```/var```, ```/etc```, ```/usr```, are immutable.
@@ -60,6 +60,15 @@ cp minimal-bashrc [[CONTAINER_HOME]]/.bashrc
 cp minimal-bash-profile [[CONTAINER_HOME]]/.bash_profile
 ```
 
+## Tmux Configuration
+
+* On host side:
+
+```shell
+mkdir -pv [[CONTAINER_HOME]]/.config/tmux
+cp tmux.conf [[CONTAINER_HOME]]/.config/tmux
+```
+
 ## CMake
 
 To pin CMake to 3.31.10 (otherwise, install via homebrew), on host side:
@@ -69,7 +78,7 @@ cd [[CONTAINER_SOFTWARE]]
 wget https://github.com/Kitware/CMake/releases/download/v3.31.10/cmake-3.31.10-linux-x86_64.tar.gz
 tar -xzf cmake-3.31.10-linux-x86_64.tar.gz && rm cmake-3.31.10-linux-x86_64.tar.gz
 echo >> [[CONTAINER_HOME]]/.bashrc
-echo 'export PATH=/software/cmake-3.31.10-linux-x86_64/bin:$PATH' >> [[CONTAINER_HOME]]/.bashrc
+echo 'export PATH="/software/cmake-3.31.10-linux-x86_64/bin:$PATH"' >> [[CONTAINER_HOME]]/.bashrc
 ```
 
 ## Homebrew
@@ -78,11 +87,17 @@ echo 'export PATH=/software/cmake-3.31.10-linux-x86_64/bin:$PATH' >> [[CONTAINER
 
 ```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
 
+Then follow installation instructions to set up ```.bashrc```.
+Run ```brew doctor``` to check for correct installation and setup.
+
 ## Applications
 
 * On container side:
 
 ```shell
+# Update brew indexes
+brew update
+
 # Claude
 brew install --cask claude-code
 
@@ -101,14 +116,17 @@ brew install \
     ranger \
     uv
 
-#GDB Dashboard
+# GDB Dashboard
 wget -P ~ https://github.com/cyrus-and/gdb-dashboard/raw/master/.gdbinit
 
+# Better alias for gdu
 echo >> $HOME/.bashrc
 echo 'alias gdu="gdu-go"' >> $HOME/.bashrc
 ```
 
 ## Neovim Configuration
+
+* On container side:
 
 ```shell
 mkdir -pv $HOME/.config
@@ -121,20 +139,15 @@ echo 'alias vim="nvim"' >> $HOME/.bashrc
 echo 'alias vimdiff="nvim -d"' >> $HOME/.bashrc
 ```
 
-## Tmux Configuration
-
-* On host side:
-
-```shell
-mkdir -pv [[CONTAINER_HOME]]/.config/tmux
-cp tmux.conf [[CONTAINER_HOME]]/.config/tmux
-```
+## Enabling Tmux Configuration
 
 * On container side (if already on tmux,
 otherwise configuration is loaded next time tmux is opened):
 
 ```tmux source-file $HOME/.config/tmux/tmux.conf```
 
-* Then to install plugins (during a tmux session, only needs to be done once):
+* Then in tmux session, to install plugins (only needs to be done once):
 
 ```<ctrl-b>I```
+
+(This operation requires some time, tmux will display a notification when done.)
