@@ -19,6 +19,35 @@ home_name="$home/$apptainer_name"
 rm -rf "$tmp"
 mkdir -pv "$software" "$overlay" "$home" "$data" "$work" "$tmp" "$home_name"
 
+if [ ! -f "$home_name/.bashrc" ]; then
+    cp minimal-bashrc "$home_name/.bashrc"
+fi
+
+if [ ! -f "$home_name/.bash_profile" ]; then
+    cp minimal-bash-profile "$home_name/.bash_profile"
+fi
+
+if [ ! -d "$home_name/.config/tmux" ]; then
+    mkdir -pv "$home_name/.config/tmux"
+    cp tmux.conf "$home_name/.config/tmux/"
+fi
+
+if [ ! -d "$home_name/.config/nvim" ]; then
+    git clone --single-branch --depth 1 -b main \
+        https://github.com/JoseJVS/nvim_config.git \
+        "$home_name/.config/nvim"
+fi
+
+if [ ! -d "$software/cmake-3.31.10-linux-x86_64" ]; then
+    wget https://github.com/Kitware/CMake/releases/download/v3.31.10/cmake-3.31.10-linux-x86_64.tar.gz \
+    && tar -xzf cmake-3.31.10-linux-x86_64.tar.gz -C "$software" \
+    && rm cmake-3.31.10-linux-x86_64.tar.gz
+fi
+
+if [ ! -f "$home_name/.gdbinit" ]; then
+    wget -P "$home_name" https://github.com/cyrus-and/gdb-dashboard/raw/master/.gdbinit
+fi
+
 gpu_environment=()
 if [[ ${CUDA_VISIBLE_DEVICES+x} ]]; then
     gpu_environment+=(

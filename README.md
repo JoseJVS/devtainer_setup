@@ -51,36 +51,6 @@ state
 In the following sections, double square brackets point to bind paths generated
 by ```run_isolated_container.sh``` as seen by the host.
 
-## Bash Runtime Configuration
-
-* On host side:
-
-```shell
-cp minimal-bashrc [[CONTAINER_HOME]]/.bashrc
-cp minimal-bash-profile [[CONTAINER_HOME]]/.bash_profile
-```
-
-## Tmux Configuration
-
-* On host side:
-
-```shell
-mkdir -pv [[CONTAINER_HOME]]/.config/tmux
-cp tmux.conf [[CONTAINER_HOME]]/.config/tmux
-```
-
-## CMake
-
-To pin CMake to 3.31.10 (otherwise, install via homebrew), on host side:
-
-```shell
-cd [[CONTAINER_SOFTWARE]]
-wget https://github.com/Kitware/CMake/releases/download/v3.31.10/cmake-3.31.10-linux-x86_64.tar.gz
-tar -xzf cmake-3.31.10-linux-x86_64.tar.gz && rm cmake-3.31.10-linux-x86_64.tar.gz
-echo >> [[CONTAINER_HOME]]/.bashrc
-echo 'export PATH="/software/cmake-3.31.10-linux-x86_64/bin:$PATH"' >> [[CONTAINER_HOME]]/.bashrc
-```
-
 ## Homebrew
 
 * On container side see [brew.sh](https://brew.sh/):
@@ -115,28 +85,6 @@ brew install \
     tree-sitter-cli \
     ranger \
     uv
-
-# GDB Dashboard
-wget -P ~ https://github.com/cyrus-and/gdb-dashboard/raw/master/.gdbinit
-
-# Better alias for gdu
-echo >> $HOME/.bashrc
-echo 'alias gdu="gdu-go"' >> $HOME/.bashrc
-```
-
-## Neovim Configuration
-
-* On container side:
-
-```shell
-mkdir -pv $HOME/.config
-git clone --single-branch --depth 1 -b main \
-    https://github.com/JoseJVS/nvim_config.git \
-    $HOME/.config/nvim
-
-echo >> $HOME/.bashrc
-echo 'alias vim="nvim"' >> $HOME/.bashrc
-echo 'alias vimdiff="nvim -d"' >> $HOME/.bashrc
 ```
 
 ## Enabling Tmux Configuration
@@ -151,3 +99,8 @@ otherwise configuration is loaded next time tmux is opened):
 ```<ctrl-b>I```
 
 (This operation requires some time, tmux will display a notification when done.)
+
+## Enabling Neovim Configuration
+
+On container side open ```nvim``` (or with ```vim``` alias), then accept plugin installation
+and wait for all LSPs to finish installing.

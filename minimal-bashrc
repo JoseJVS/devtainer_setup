@@ -1,6 +1,3 @@
-export COLORTERM=truecolor
-export TERM=xterm-256color
-
 if [ -x /usr/bin/dircolors ]; then
     eval "$(dircolors -b)"
     alias ls="ls --color=auto"
@@ -20,7 +17,11 @@ if ! shopt -oq posix; then
 fi
 
 if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
+if [ -d "/software/cmake-3.31.10-linux-x86_64/bin" ]; then
+    export PATH="/software/cmake-3.31.10-linux-x86_64/bin:$PATH"
 fi
 
 alias ll="ls -alh"
@@ -29,3 +30,8 @@ alias cdd="cd /data"
 alias gs="git status -sb"
 alias mki="make -j $(nproc) && make install"
 alias sedtree="sed -e 's;[^/]*/; /;g;s;/ ;    ;g;s;^ /$;.;;s; /;|-- ;g'"
+
+# Hombrew installed software
+alias vim="nvim"
+alias vimdiff="nvim -d"
+alias gdu="gdu-go"
