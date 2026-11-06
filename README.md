@@ -48,9 +48,6 @@ state
 [rw] -> read and write
 ```
 
-In the following sections, double square brackets point to bind paths generated
-by ```run_isolated_container.sh``` as seen by the host.
-
 ## Homebrew
 
 * On container side see [brew.sh](https://brew.sh/):
