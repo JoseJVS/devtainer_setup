@@ -54,14 +54,16 @@ state
 
 ```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
 
-Then follow installation instructions to set up ```.bashrc```.
-Run ```brew doctor``` to check for correct installation and setup.
+Then follow installer instructions to set up ```.bashrc```.
 
-## Applications
+### Install Development Applications
 
 * On container side:
 
 ```shell
+# Check hombrew installation success
+brew doctor
+
 # Update brew indexes
 brew update
 
