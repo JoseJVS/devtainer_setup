@@ -21,11 +21,8 @@ From: nvidia/cuda:13.5.0-devel-ubuntu26.04
         libc6-dev \
         libc6-dbg \
         libstdc++6 \
-        libgfortran5 \
-        libgfortran-16-dev \
         gcc \
         g++ \
-        gfortran-16 \
         build-essential \
         pkg-config \
         libtool \
