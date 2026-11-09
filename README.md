@@ -82,7 +82,6 @@ brew install \
     gdu \
     btop \
     tree-sitter-cli \
-    ranger \
     uv
 ```
 
