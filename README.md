@@ -101,5 +101,5 @@ otherwise configuration is loaded next time tmux is opened):
 
 ## Enabling Neovim Configuration
 
-On container side open ```nvim``` (or with ```vim``` alias), then accept plugin installation
-and wait for all LSPs to finish installing.
+On container side open ```nvim``` (or with ```vim``` alias),
+then accept plugin installation and wait for all LSPs to finish installing.
