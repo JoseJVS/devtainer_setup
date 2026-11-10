@@ -48,7 +48,7 @@ state
 [rw] -> read and write
 ```
 
-## Homebrew
+## Homebrew (optional)
 
 * On container side see [brew.sh](https://brew.sh/):
 
@@ -85,7 +85,12 @@ brew install \
     uv
 ```
 
-## Enabling Tmux Configuration
+### Installing Ranger
+
+* On container side:
+```uv tool install ranger-fm```
+
+### Enabling Tmux Configuration
 
 * On container side (if already on tmux,
 otherwise configuration is loaded next time tmux is opened):
@@ -98,7 +103,7 @@ otherwise configuration is loaded next time tmux is opened):
 
 (This operation requires some time, tmux will display a notification when done.)
 
-## Enabling Neovim Configuration
+### Enabling Neovim Configuration
 
 On container side open ```nvim``` (or with ```vim``` alias),
 then accept plugin installation and wait for all LSPs to finish installing.
