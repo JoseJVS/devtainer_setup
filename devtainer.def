@@ -46,6 +46,9 @@ From: nvidia/cuda:13.5.0-devel-ubuntu26.04
         libboost-all-dev \
         libgsl-dev \
         gsl-bin \
+        libhdf5-dev \
+        libhdf5-openmpi-dev \
+        hdf5-tools \
         git \
         gdb \
         linux-perf \
@@ -60,8 +63,7 @@ From: nvidia/cuda:13.5.0-devel-ubuntu26.04
         less \
         file \
         procps \
-        sudo \
-        xclip
+        sudo
 
     # Check installed packages
     apt-get check
