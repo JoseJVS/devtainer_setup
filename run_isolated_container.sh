@@ -27,6 +27,10 @@ if [ ! -f "$home_name/.bash_profile" ]; then
     cp minimal-bash-profile "$home_name/.bash_profile"
 fi
 
+if [ ! -d "$home_name/.local/bin" ]; then
+    mkdir -pv "$home_name/.local/bin"
+fi
+
 if [ ! -d "$home_name/.config/tmux" ] || [ ! -f "$home_name/.config/tmux/tmux.conf" ]; then
     mkdir -pv "$home_name/.config/tmux"
     cp tmux.conf "$home_name/.config/tmux/"
