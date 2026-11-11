@@ -23,10 +23,6 @@ if [ ! -f "$home_name/.bashrc" ]; then
     cp minimal-bashrc "$home_name/.bashrc"
 fi
 
-if [ ! -f "$home_name/.bash_profile" ]; then
-    cp minimal-bash-profile "$home_name/.bash_profile"
-fi
-
 if [ ! -d "$home_name/.local/bin" ]; then
     mkdir -pv "$home_name/.local/bin"
 fi
