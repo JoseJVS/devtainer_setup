@@ -61,11 +61,8 @@ Then follow installer instructions to set up ```.bashrc```.
 * On container side:
 
 ```shell
-# Check hombrew installation success
-brew doctor
-
-# Update brew indexes
-brew update
+# Check hombrew installation success and update brew indexes
+brew doctor && brew update
 
 # Claude
 brew install --cask claude-code
@@ -82,10 +79,11 @@ brew install \
     gdu \
     btop \
     tree-sitter-cli \
-    uv
+    uv \
+    gh
 ```
 
-### Installing Ranger
+#### Installing Ranger
 
 * On container side:
 ```uv tool install ranger-fm```
