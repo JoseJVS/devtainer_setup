@@ -105,3 +105,12 @@ otherwise configuration is loaded next time tmux is opened):
 
 On container side open ```nvim``` (or with ```vim``` alias),
 then accept plugin installation and wait for all LSPs to finish installing.
+
+## Notes
+
+* Remember to set up your GitHub author configuration on container side with:
+
+```shell
+git config user.name "Your Name"
+git config user.email "you@example.com"
+```
