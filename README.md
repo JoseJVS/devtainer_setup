@@ -121,3 +121,20 @@ git config user.email "you@example.com"
 * Use your keys or tokens to clone and push on the host side.
 * On container side, give Claude permission to commit and manipulate branches.
 (ideally always asking for approval first)
+
+### `Perf` Workflow
+
+To run `perf` in container it is necessary to have a
+low event paranoid level on host side:
+
+* Check paranoid level:
+
+```shell
+sysctl kernel.perf_event_paranoid
+```
+
+* Temporarily lower the paranoid level:
+
+```shell
+sudo sysctl -w kernel.perf_event_paranoid=-1
+```
