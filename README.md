@@ -114,3 +114,10 @@ then accept plugin installation and wait for all LSPs to finish installing.
 git config user.name "Your Name"
 git config user.email "you@example.com"
 ```
+
+### Git Workflow
+
+* **DO NOT** expose ssh keys or API tokens to the container environment.
+* Use your keys or tokens to clone and push on the host side.
+* On container side, give Claude permission to commit and manipulate branches.
+(ideally always asking for approval first)
