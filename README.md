@@ -127,7 +127,7 @@ git config user.email "you@example.com"
 To run `perf` in container it is necessary to have a
 low event paranoid level on host side:
 
-* Check paranoid level:
+* Check paranoid level (default 4):
 
 ```shell
 sysctl kernel.perf_event_paranoid
