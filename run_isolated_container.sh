@@ -20,16 +20,16 @@ rm -rf "$tmp"
 mkdir -pv "$software" "$overlay" "$home" "$data" "$work" "$tmp" "$home_name"
 
 if [ ! -f "$home_name/.bashrc" ]; then
-    cp minimal-bashrc "$home_name/.bashrc"
+    cp "$apptainer_root/minimal-bashrc" "$home_name/.bashrc"
 fi
 
 if [ ! -d "$home_name/.local/bin" ]; then
     mkdir -pv "$home_name/.local/bin"
 fi
 
-if [ ! -d "$home_name/.config/tmux" ] || [ ! -f "$home_name/.config/tmux/tmux.conf" ]; then
+if [ ! -f "$home_name/.config/tmux/tmux.conf" ]; then
     mkdir -pv "$home_name/.config/tmux"
-    cp tmux.conf "$home_name/.config/tmux/"
+    cp "$apptainer_root/tmux.conf" "$home_name/.config/tmux/"
 fi
 
 if [ ! -d "$home_name/.config/nvim" ]; then
@@ -39,13 +39,19 @@ if [ ! -d "$home_name/.config/nvim" ]; then
 fi
 
 if [ ! -d "$software/cmake-3.31.10-linux-x86_64" ]; then
-    wget https://github.com/Kitware/CMake/releases/download/v3.31.10/cmake-3.31.10-linux-x86_64.tar.gz \
-    && tar -xzf cmake-3.31.10-linux-x86_64.tar.gz -C "$software" \
-    && rm cmake-3.31.10-linux-x86_64.tar.gz
+    wget -P "$apptainer_root" \
+    https://github.com/Kitware/CMake/releases/download/v3.31.10/cmake-3.31.10-linux-x86_64.tar.gz \
+    && tar -xzf "$apptainer_root/cmake-3.31.10-linux-x86_64.tar.gz" -C "$software" \
+    && rm "$apptainer_root/cmake-3.31.10-linux-x86_64.tar.gz"
 fi
 
 if [ ! -f "$home_name/.gdbinit" ]; then
     wget -P "$home_name" https://github.com/cyrus-and/gdb-dashboard/raw/master/.gdbinit
+fi
+
+if [ ! -f "$home_name/.claude/settings.json" ]; then
+    mkdir -pv "$home_name/.claude"
+    cp "$apptainer_root/claude-settings.json" "$home_name/.claude/settings.json"
 fi
 
 gpu_environment=()
