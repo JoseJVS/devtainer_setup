@@ -11,11 +11,7 @@ How to work:
 
 1. Invoke the `code-review` skill with the Skill tool (skill `code-review`). Pass the effort level and target you were given (for example `medium` for the current diff); without one, use `medium` on the uncommitted diff. Never pass `--fix` and never post comments. The skill runs forked and returns its findings as text; a result of "(none)" means it found nothing. In that case, still do the project-rule checks of step 3 yourself.
 2. Check each finding against the code yourself before reporting it, with file:line evidence. Drop findings you cannot confirm.
-3. Check the project rules from CLAUDE.md and the improvement plan that the skill does not know about, in particular:
-   - no throw, try or catch inside OpenMP regions; inputs are validated before the region, where they are used, with data every rank holds, so all ranks fail alike;
-   - no check duplicated between the manager and the modules;
-   - results must stay identical for the same process and thread counts;
-   - no narrowing conversions; only `sapi/` and `testsuite/sapi/` change, never `thirdparty/`.
+3. Read the project's CLAUDE.md (and any planning documents it points to) and check the change against the project's own rules, which the skill does not know about: code rules, error-handling and parallelism rules, determinism or reproducibility requirements, type and conversion conventions, and which directories may change (never `thirdparty/` or other vendored code).
 4. Do not build, run tests or run git commands that change state (no commit, add, checkout, stash, reset). Read-only git (`diff`, `log`, `show`, `status`) is fine.
 
 Report format (your final message is the result):

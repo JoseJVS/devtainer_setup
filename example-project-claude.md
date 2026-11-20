@@ -2,7 +2,7 @@
 
 NEST GPU is a CUDA + MPI library for simulating large-scale spiking neural networks, usable from Python, C++ and C. Its Python interface mirrors the NEST simulator (dictionaries for neuron/connection/synapse properties). User docs: <https://nest-gpu.readthedocs.io>.
 
-The branch (`sapi-update`) focuses on **SAPI**, the Spatial API in `//work/sapi-update/nest-gpu/sapi/`: a pure C++17 (no CUDA) library for distributed spatial node placement and spatially-masked connection generation across MPI ranks and OpenMP threads.
+The branch (`sapi-update`) focuses on **SAPI**, the Spatial API in `//work/sapi-update/nest-gpu/sapi/`: a pure C++20 (no CUDA) library for distributed spatial node placement and spatially-masked connection generation across MPI ranks and OpenMP threads.
 
 ## Directory hierarchy
 
@@ -35,6 +35,8 @@ The branch (`sapi-update`) focuses on **SAPI**, the Spatial API in `//work/sapi-
 - The C++ SAPI test command runs a bash script that executes all C++ SAPI tests. Each test success is checked with the exit code, code 0 denotes successful execution. The bash script automatically executes MPI tests with varying configuration of processes. If all tests pass then the test command exits with code 0 too.
 - Before running any Python tests ensure the Python venv is loaded and all compilation steps successfully ran since the last change to the repository.
 - To run invididual Python tests execute: ```mpirun -np #N# python <test_file>.py``` where N is the number of MPI processes. Test success is checked with the exit code, code 0 denotes successful execution. Tests be should run with at least 1 and 2 MPI processes.
+- New tests: add the source to `sapi_tests_sources` in `testsuite/sapi/CMakeLists.txt`, MPI tests also to `multi_processing_tests`, tests with deliberately oversized inputs also to `memory_capped_tests` (run under `ulimit -v`). Changing that CMake file means a clean rebuild.
+- Run new or memory-heavy tests one at a time under `ulimit -v` (e.g. 4 GB per process) before the full `make sapicheck`; unbounded runs have exhausted the machine's memory.
 
 ## Formatting
 
@@ -70,6 +72,18 @@ Everything is in `namespace sapi`, mostly header-only templates over a coordinat
 - **Determinism**: RNG streams are seeded per rank/thread/parity from constants in `sapi_config.h` (`random_manager.*`). Results must be identical for the same number of MPI processes and OpenMP threads per process, which `repeatability_test` checks for repeated construction within one run. Reproducibility across different process or thread counts is not supported yet. Only the multiset of connections is reproducible, not their order. Preserve this when changing generation order or RNG consumption.
 - **Parallelism**: MPI code is guarded by `HAVE_MPI` (from the generated `libnestutil/config.h`). OpenMP uses `taskloop` with `num_tasks(strict: …)`. Per-thread data uses `thread_aligned_array.h` to avoid false sharing.
 - Signed/unsigned and width choices in `sapi_config.h` typedefs are deliberate (see the comments there). Avoid narrowing conversions, which recent commits have been removing.
+
+## SAPI code rules
+
+- No `throw`, `try` or `catch` inside OpenMP regions. Validate inputs before the region, in the function that uses them, with data every rank holds, so all ranks throw the same `std::invalid_argument`. Inside regions only `assert` conditions that were validated up front.
+- Check each input once, where it is used; the manager does not repeat checks of the modules it forwards to.
+- Prefer named free functions over lambdas that hold logic; keep lambdas for short predicates and one-line forwarders (e.g. `dispatch_bools`).
+- Only `sapi/` and `testsuite/sapi/` change for SAPI work; existing test files change only when asked.
+
+## Verification and planning
+
+- Restart point: `//work/sapi-update/documentation/progress.md` (status of all phases; plan in `sapi_improvement_plan.md`).
+- Tools in `//work/sapi-update/documentation/tools` (see its README): `conversion_ratchet.sh check ../baseline/q0_conversion_warnings.txt` (no new conversion warnings), `link_check.sh`, `run_fingerprint.sh` + `compare_fingerprint.sh` (output must stay identical unless a change intends otherwise).
 
 ## Conventions
 
