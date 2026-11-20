@@ -49,9 +49,8 @@ if [ ! -f "$home_name/.gdbinit" ]; then
     wget -P "$home_name" https://github.com/cyrus-and/gdb-dashboard/raw/master/.gdbinit
 fi
 
-if [ ! -f "$home_name/.claude/settings.json" ]; then
-    mkdir -pv "$home_name/.claude"
-    cp "$apptainer_root/claude-settings.json" "$home_name/.claude/settings.json"
+if [ ! -d "$home_name/.claude" ]; then
+    cp -r "$apptainer_root/claude-conf" "$home_name/.claude"
 fi
 
 gpu_environment=()
