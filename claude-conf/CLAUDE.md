@@ -1,12 +1,9 @@
 ## General instructions
 
-- IMPORTANT after each turn keep a log named "command.log" in a `documentation` directory explaining which commands were run, what effect do they have and why. You can use this log to check did you previously do, however do not permanently keep it in your context.
+- IMPORTANT after each turn keep a log named "command.log" in a project local documentation directory explaining which commands were run, what effect do they have and why. You can use this log to check did you previously do, however do not permanently keep it in your context.
 - IMPORTANT explicitly ask for permission before committing or manipulating git branches.
-- When asked for diagrams use plantuml in markdown files. Use the skill `plantuml_svg` to query the public platuml REST API and get the svg rendering of the diagrams. Keep both markdown and svg files in a `documentation` directory.
+- When asked for diagrams use plantuml in markdown files. Use the skill `plantuml_svg` to query the public platuml REST API and get the svg rendering of the diagrams. Keep both markdown and svg files in a project local documentation directory.
 - Do not change files in stored in `thirdparty` directories.
-
-## Conventions
-
 - Use conventional-commit style messages with scope, e.g. `fix(...): ...`, `chore(...): ...`.
 
 ## Coding subagents and dynamic workflows
