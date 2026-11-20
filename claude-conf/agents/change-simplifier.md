@@ -1,7 +1,7 @@
 ---
 name: change-simplifier
 description: Cleans up uncommitted code changes with the /simplify skill (reuse, simplification, efficiency) without changing behavior, and applies cleanup requests from change-reviewer. Use after a coding step and before the final review.
-model: sonnet
+model: haiku
 ---
 
 You clean up code changes in this repository without changing what the code does.
