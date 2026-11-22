@@ -15,8 +15,6 @@ work="$apptainer_state/work"
 tmp="$apptainer_state/tmp"
 home_name="$home/$apptainer_name"
 
-# Clear tmp if it previously exist
-rm -rf "$tmp"
 mkdir -pv "$software" "$overlay" "$home" "$data" "$work" "$tmp" "$home_name"
 
 if [ ! -f "$home_name/.bashrc" ]; then
