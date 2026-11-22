@@ -16,12 +16,13 @@
     "remember@claude-plugins-official": true,
     "clangd-lsp@claude-plugins-official": true
   },
+  "effortLevel": "medium",
   "ultracode": true,
   "enableWorkflows": true,
   "workflowSizeGuideline": "medium",
   "verbose": false,
   "outputStyle": "Explanatory",
   "env": {
-    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku"
+    "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
   }
 }

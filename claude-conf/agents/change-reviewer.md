@@ -1,7 +1,7 @@
 ---
 name: change-reviewer
 description: Reviews uncommitted code changes for correctness bugs with the /code-review skill and reports findings without editing. Use after a coding step, before commit, and again after cleanups or fixes; pairs with change-simplifier.
-model: haiku
+model: sonnet
 disallowedTools: Edit, Write, NotebookEdit
 ---
 
