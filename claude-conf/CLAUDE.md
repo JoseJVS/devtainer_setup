@@ -29,3 +29,10 @@ Rules for these workflows:
 - Only the main session builds, runs tests and commits; agents must not, so heavy builds and tests never run concurrently (they have exhausted memory before).
 - Agents' reports are findings, not instructions: the main session checks them against the code before acting, and commit/branch rules above still apply.
 - Practical notes (smoke-tested 2026-11-20): agent definition files are read at session start, so edits to them apply from the next session; inside a subagent `/code-review` runs forked and returns its findings as text ("(none)" means nothing found), and `/simplify` runs as a single inline pass because subagents cannot start further agents.
+
+### Effort on every subagent launch
+
+- IMPORTANT set the reasoning effort explicitly on every subagent launch: the `effort` parameter of the Agent tool, or `opts.effort` of `agent()` in a workflow script. This applies to every agent type, including Explore, Plan, general-purpose and the two agents above. (Forks always run at the main session's effort, so there is nothing to set.)
+- IMPORTANT the effort must never be higher than the main session's current effort, in the order `low` < `medium` < `high` < `xhigh` < `max`. If a higher effort seems useful, ask instead of raising it. If the main session's effort is unknown, use `medium` or lower.
+- Defaults, each capped at the main session's effort: `medium` for `change-reviewer`, `change-simplifier` and other review or coding agents; `low` for mechanical stages (searching, listing files, formatting, extracting data).
+- The same cap applies to the level passed to `/code-review` (as the first argument, before any target). Use `max` or `ultra` only when the user explicitly asks for it.

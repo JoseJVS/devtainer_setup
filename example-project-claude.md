@@ -36,6 +36,10 @@ The branch (`sapi-update`) focuses on **SAPI**, the Spatial API in `//work/sapi-
 - Before running any Python tests ensure the Python venv is loaded and all compilation steps successfully ran since the last change to the repository.
 - To run invididual Python tests execute: ```mpirun -np #N# python <test_file>.py``` where N is the number of MPI processes. Test success is checked with the exit code, code 0 denotes successful execution. Tests be should run with at least 1 and 2 MPI processes.
 - New tests: add the source to `sapi_tests_sources` in `testsuite/sapi/CMakeLists.txt`, MPI tests also to `multi_processing_tests`, tests with deliberately oversized inputs also to `memory_capped_tests` (run under `ulimit -v`). Changing that CMake file means a clean rebuild.
+- New shared test headers go in `sapi_tests_helper_headers` (same CMake file).
+- Geometry tests: `geometry_test_helpers.h` holds the reference polygons and samplers, and `exact_geometry_test.cpp` checks the mask/tile filters against an independent oracle (`geometry_oracle.h` for the generic part, `geometry2d_oracle.h` for 2D). Any change to `tile_overlap`, `tiles_within_mask_range` or `overlap_with_tile_surface` must keep it passing. Its `EXACT_NONCIRCULAR_B1/B2` flags switch on the gap checks for the non-circular masks once those filters are exact.
+- Test-only checks that must also hold under NDEBUG use a `require()` helper, not `assert`.
+- Including `grid_generation.h` in a test needs `bounding_box.h` included first.
 - Run new or memory-heavy tests one at a time under `ulimit -v` (e.g. 4 GB per process) before the full `make sapicheck`; unbounded runs have exhausted the machine's memory.
 
 ## Formatting
@@ -45,6 +49,7 @@ The branch (`sapi-update`) focuses on **SAPI**, the Spatial API in `//work/sapi-
 - There are also additional formatting scripts run by ```pre-commit```, the configuration file is in `//work/sapi-update/nest-gpu/.pre-commit-config.yaml`.
 - ```clang-format```, ```ruff format```, and ```pre-commit``` are available in the Python venv.
 - To run all formatters on changed files run: ```pre-commit run --all-files``` in the repository directory.
+- `pre-commit run --all-files` only checks files git already knows about: run `git add -N <new files>` first so new files are checked too.
 - Always format after editing files, especially before running building steps after changes.
 - No linting is currently required.
 
@@ -79,11 +84,13 @@ Everything is in `namespace sapi`, mostly header-only templates over a coordinat
 - Check each input once, where it is used; the manager does not repeat checks of the modules it forwards to.
 - Prefer named free functions over lambdas that hold logic; keep lambdas for short predicates and one-line forwarders (e.g. `dispatch_bools`).
 - Only `sapi/` and `testsuite/sapi/` change for SAPI work; existing test files change only when asked.
+- Dimension layering: generic files (no `2d`/`3d` in the name) hold only the dimension-agnostic interface, the shared object definitions and plain dispatch (`if constexpr` on `CoordT`, `switch` on shape). Dimension-specific logic goes in `*2d_*` files (later `*3d_*`). `coordinates.h`/`coordinate_geometry.*` may hold both 2D and 3D primitives, which generic code reaches only through the `Coordinate` concept. `enum_store.h` is the free-standing enum header. `documentation/tools/layer_check.sh` must report 0 leaks.
+- Masks are convex and contain their `anchor_`. `bounding_disc_` is centred on the shape, so for triangles it is not centred on the anchor, which is a vertex.
 
 ## Verification and planning
 
 - Restart point: `//work/sapi-update/documentation/progress.md` (status of all phases; plan in `sapi_improvement_plan.md`).
-- Tools in `//work/sapi-update/documentation/tools` (see its README): `conversion_ratchet.sh check ../baseline/q0_conversion_warnings.txt` (no new conversion warnings), `link_check.sh`, `run_fingerprint.sh` + `compare_fingerprint.sh` (output must stay identical unless a change intends otherwise).
+- Tools in `//work/sapi-update/documentation/tools` (see its README): `conversion_ratchet.sh check ../baseline/q0_conversion_warnings.txt` (no new conversion warnings), `link_check.sh`, `run_fingerprint.sh` + `compare_fingerprint.sh` (output must stay identical unless a change intends otherwise), `layer_check.sh` (no dimension leaks), `sapi_geometry_check`/`sapi_geometry_e2e` (geometry filters), `run_bench.sh` (A/B benchmarks; each rank gets its own hardware threads: `--map-by slot:PE=<t>:hwtcpus --bind-to hwthread`, `OMP_PLACES=threads`, `OMP_PROC_BIND=spread`).
 
 ## Conventions
 
