@@ -80,7 +80,8 @@ brew install \
     btop \
     tree-sitter-cli \
     uv \
-    gh
+    gh \
+    llvm
 ```
 
 #### Installing Ranger
