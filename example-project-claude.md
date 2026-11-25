@@ -41,6 +41,9 @@ The branch (`sapi-update`) focuses on **SAPI**, the Spatial API in `//work/sapi-
 - Test-only checks that must also hold under NDEBUG use a `require()` helper, not `assert`.
 - Including `grid_generation.h` in a test needs `bounding_box.h` included first.
 - Run new or memory-heavy tests one at a time under `ulimit -v` (e.g. 4 GB per process) before the full `make sapicheck`; unbounded runs have exhausted the machine's memory.
+- `make sapicheck` runs the installed test copies in `build/tests/sapi/`, not `build/testsuite/sapi/`: always build **and** install before it, or it reports stale results.
+- `capi_error_handling_test` hardcodes each registry's names list in its expected messages; registering a new mask, grid functor, etc. means updating that string.
+- `exact_geometry_test`'s `conservative_*` references copy single filter stages; moving a test between stages (e.g. into the per-shape surface test) needs those references updated, even when results are bit-identical.
 
 ## Formatting
 
@@ -85,12 +88,14 @@ Everything is in `namespace sapi`, mostly header-only templates over a coordinat
 - Prefer named free functions over lambdas that hold logic; keep lambdas for short predicates and one-line forwarders (e.g. `dispatch_bools`).
 - Only `sapi/` and `testsuite/sapi/` change for SAPI work; existing test files change only when asked.
 - Dimension layering: generic files (no `2d`/`3d` in the name) hold only the dimension-agnostic interface, the shared object definitions and plain dispatch (`if constexpr` on `CoordT`, `switch` on shape). Dimension-specific logic goes in `*2d_*` files (later `*3d_*`). `coordinates.h`/`coordinate_geometry.*` may hold both 2D and 3D primitives, which generic code reaches only through the `Coordinate` concept. `enum_store.h` is the free-standing enum header. `documentation/tools/layer_check.sh` must report 0 leaks.
-- Masks are convex and contain their `anchor_`. `bounding_disc_` is centred on the shape, so for triangles it is not centred on the anchor, which is a vertex.
+- Generic `Mask` tests assume neither convexity nor an anchor inside the mask; tests that depend on a shape property live in the per-shape functions behind the `mask_geometry.h` dispatchers. The convex shapes contain their `anchor_`, which their per-shape tests rely on (first accept: `anchor_in_tile`); the annulus is centered on its anchor and starts with its hole reject instead. The per-pair `coord_in_mask` dispatchers switch over the convex shapes only and forward `default` to `coord_in_nonconvex_mask` (a fifth case made GCC emit a jump table, ~5% slower). `bounding_disk_` is centered on the shape, so for triangles it is not centered on the anchor, which is a vertex.
 
 ## Verification and planning
 
 - Restart point: `//work/sapi-update/documentation/progress.md` (status of all phases; plan in `sapi_improvement_plan.md`).
 - Tools in `//work/sapi-update/documentation/tools` (see its README): `conversion_ratchet.sh check ../baseline/q0_conversion_warnings.txt` (no new conversion warnings), `link_check.sh`, `run_fingerprint.sh` + `compare_fingerprint.sh` (output must stay identical unless a change intends otherwise), `layer_check.sh` (no dimension leaks), `sapi_geometry_check`/`sapi_geometry_e2e` (geometry filters), `run_bench.sh` (A/B benchmarks; each rank gets its own hardware threads: `--map-by slot:PE=<t>:hwtcpus --bind-to hwthread`, `OMP_PLACES=threads`, `OMP_PROC_BIND=spread`).
+- `run_fingerprint.sh <dir> <label>`: baseline labels end in `_fingerprint` (e.g. `q8_2_fingerprint`), which `compare_fingerprint.sh` expects. Files with more than one rank hold per-rank sections, so new scenarios land mid-file: compare with the new scenario's lines filtered out (`grep -v <name>`).
+- Hot-path changes (mask dispatch, per-pair code) need a same-session A/B, not a comparison with an old baseline file (drift reaches ±5%): build both trees in the scratchpad (`git archive <commit> sapi`, compile `sapi/*.cpp` with the `sapi_kernel` flags into `libsapi_kernel.a`, build `sapi_fingerprint` with `build_tools.sh`'s flags, copy `run_bench.sh` + `bench_summary.py` next to each binary) and run the versions alternately (A, B, A, B).
 
 ## Conventions
 
