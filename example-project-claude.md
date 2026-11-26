@@ -23,6 +23,7 @@ The branch (`sapi-update`) focuses on **SAPI**, the Spatial API in `//work/sapi-
 ## Compilation
 
 - Always load Python venv first then in order: configure, build, install.
+- A new `sapi/*.cpp` must be added to `sapi_kernel_sources` in `sapi/CMakeLists.txt` (then clean rebuild).
 - The configuration step is only needed once unless there is a change in the `CMake` files. If there is a change in these files, then clean the build directory and re-run the configuration step.
 - Ensure build and install are executed after every change to the nest-gpu repository.
 - If the repository branch changes then clean the build directory, and re-run configure, build, install.
@@ -36,6 +37,7 @@ The branch (`sapi-update`) focuses on **SAPI**, the Spatial API in `//work/sapi-
 - Before running any Python tests ensure the Python venv is loaded and all compilation steps successfully ran since the last change to the repository.
 - To run invididual Python tests execute: ```mpirun -np #N# python <test_file>.py``` where N is the number of MPI processes. Test success is checked with the exit code, code 0 denotes successful execution. Tests be should run with at least 1 and 2 MPI processes.
 - New tests: add the source to `sapi_tests_sources` in `testsuite/sapi/CMakeLists.txt`, MPI tests also to `multi_processing_tests`, tests with deliberately oversized inputs also to `memory_capped_tests` (run under `ulimit -v`). Changing that CMake file means a clean rebuild.
+- SAPI builds with GCC's default FMA contraction (`-ffp-contract=fast`): one expression can round differently at different inlined call sites (test vs library). Tests comparing recomputed floating-point values use tolerances scaled to the geometry, not exact or absolute `almost_equal` comparisons. `-ffp-contract=off` was measured 3–8% slower and is not used.
 - New shared test headers go in `sapi_tests_helper_headers` (same CMake file).
 - Geometry tests: `geometry_test_helpers.h` holds the reference polygons and samplers, and `exact_geometry_test.cpp` checks the mask/tile filters against an independent oracle (`geometry_oracle.h` for the generic part, `geometry2d_oracle.h` for 2D). Any change to `tile_overlap`, `tiles_within_mask_range` or `overlap_with_tile_surface` must keep it passing. Its `EXACT_NONCIRCULAR_B1/B2` flags switch on the gap checks for the non-circular masks once those filters are exact.
 - Test-only checks that must also hold under NDEBUG use a `require()` helper, not `assert`.
@@ -44,6 +46,7 @@ The branch (`sapi-update`) focuses on **SAPI**, the Spatial API in `//work/sapi-
 - `make sapicheck` runs the installed test copies in `build/tests/sapi/`, not `build/testsuite/sapi/`: always build **and** install before it, or it reports stale results.
 - `capi_error_handling_test` hardcodes each registry's names list in its expected messages; registering a new mask, grid functor, etc. means updating that string.
 - `exact_geometry_test`'s `conservative_*` references copy single filter stages; moving a test between stages (e.g. into the per-shape surface test) needs those references updated, even when results are bit-identical.
+- Agent-written tests are never compiled by the agent: expect a fix-up round, and check coverage thresholds and test premises (e.g. "push past contact ⇒ overlap" is false for flat sets) against an independent oracle before trusting a failure.
 
 ## Formatting
 
@@ -89,6 +92,13 @@ Everything is in `namespace sapi`, mostly header-only templates over a coordinat
 - Only `sapi/` and `testsuite/sapi/` change for SAPI work; existing test files change only when asked.
 - Dimension layering: generic files (no `2d`/`3d` in the name) hold only the dimension-agnostic interface, the shared object definitions and plain dispatch (`if constexpr` on `CoordT`, `switch` on shape). Dimension-specific logic goes in `*2d_*` files (later `*3d_*`). `coordinates.h`/`coordinate_geometry.*` may hold both 2D and 3D primitives, which generic code reaches only through the `Coordinate` concept. `enum_store.h` is the free-standing enum header. `documentation/tools/layer_check.sh` must report 0 leaks.
 - Generic `Mask` tests assume neither convexity nor an anchor inside the mask; tests that depend on a shape property live in the per-shape functions behind the `mask_geometry.h` dispatchers. The convex shapes contain their `anchor_`, which their per-shape tests rely on (first accept: `anchor_in_tile`); the annulus is centered on its anchor and starts with its hole reject instead. The per-pair `coord_in_mask` dispatchers switch over the convex shapes only and forward `default` to `coord_in_nonconvex_mask` (a fifth case made GCC emit a jump table, ~5% slower). `bounding_disk_` is centered on the shape, so for triangles it is not centered on the anchor, which is a vertex.
+- 2D mask node tests must stay inlined into `find_minimal_displacement` (avoid compiler attributes) they sit at GCC's single-function inlining limit (they fit with `--param max-inline-insns-single` between 175 and 200; the default is 200), and going over costs ~30%. After changing them, check that `nm -C build/sapi/CMakeFiles/sapi_kernel.dir/c_api.cpp.o | grep ' W .*find_minimal_displacement'` is empty, and run the same-session A/B.
+- Style: switch ladders on a bit-keyed integer (as in the 2D `algebraic_projection_comparison`) over if chains; early returns that skip further computation are the exception. typedefs/`using` at the top of the file (an alias may follow a struct of the same header it uses). Pass by value only trivially copyable types < 128 bits (`Coord2D` is 128 bits: `const&`; dynamic `std::span`: `const&`), and make unmodified parameters `const`; RNG engines that get called are never `const`. No locals that only alias available objects (dereferenced pointers and variable-index elements are fine). Fold a single-use helper into its caller only if it does simple reads or arithmetic (helpers keeping a switch case simple stay). `inline` only on simple functions (no loops, few locals), except hot-path functions that rely on inlining; other non-simple functions leave headers for a `.cpp`.
+- Correctness fixes are tried even on hot paths, then benchmarked (A/B, `nm` check); keep them only if the correctness gain outweighs the slowdown, otherwise revert and document the limit at the code location.
+- Before adding a function similar to an existing one, ask: prefer generalizing or merging it (bit changes are fine if results stay correct).
+- Existing functions with similar behavior should be generalized and merge together if there are no noticeable performance impacts.
+- Common operations across functions should be refactored out into free-standing helper functions.
+- Rotations turn clockwise everywhere: `rotate_displacement` places a body (2D: R(−α); 3D: Rᵀ with `Rotation3D` rows of R = Rz·Ry·Rx), and `inverse_rotate_displacement` maps into its frame. Tiles, grids and the ellipse store the (cos, sin) of +angle; `create_angular_offset` is exact at multiples of 90°.
 
 ## Verification and planning
 
@@ -96,8 +106,10 @@ Everything is in `namespace sapi`, mostly header-only templates over a coordinat
 - Tools in `//work/sapi-update/documentation/tools` (see its README): `conversion_ratchet.sh check ../baseline/q0_conversion_warnings.txt` (no new conversion warnings), `link_check.sh`, `run_fingerprint.sh` + `compare_fingerprint.sh` (output must stay identical unless a change intends otherwise), `layer_check.sh` (no dimension leaks), `sapi_geometry_check`/`sapi_geometry_e2e` (geometry filters), `run_bench.sh` (A/B benchmarks; each rank gets its own hardware threads: `--map-by slot:PE=<t>:hwtcpus --bind-to hwthread`, `OMP_PLACES=threads`, `OMP_PROC_BIND=spread`).
 - `run_fingerprint.sh <dir> <label>`: baseline labels end in `_fingerprint` (e.g. `q8_2_fingerprint`), which `compare_fingerprint.sh` expects. Files with more than one rank hold per-rank sections, so new scenarios land mid-file: compare with the new scenario's lines filtered out (`grep -v <name>`).
 - Hot-path changes (mask dispatch, per-pair code) need a same-session A/B, not a comparison with an old baseline file (drift reaches ±5%): build both trees in the scratchpad (`git archive <commit> sapi`, compile `sapi/*.cpp` with the `sapi_kernel` flags into `libsapi_kernel.a`, build `sapi_fingerprint` with `build_tools.sh`'s flags, copy `run_bench.sh` + `bench_summary.py` next to each binary) and run the versions alternately (A, B, A, B).
+- Profiling a regression: `perf record -e cycles:u` (otherwise mostly kernel samples), then `perf report --sort sym`; for inlining, compile the TU with `-fopt-info-inline-missed=<file>` (e.g. `sapi/c_api.cpp` holds the connection loops).
 
 ## Conventions
 
 - Every source file starts with the GPL-2.0 NEST GPU license header (`<filename>` / "This file is part of NEST GPU").
 - On this branch the scope for conventional commits is `sapi`, e.g. `fix(sapi): ...`, `chore(sapi): ...`.
+- Comments never cite audit or plan items; they state the reason. External references: each cited at most once across `sapi/`, scholarly DOIs first, verified (resolved, authors, title, venue, year, supported claim) before adding.
